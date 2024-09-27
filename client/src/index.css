@@ -1,0 +1,19 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-gradient-from: #ffffff;
+  --bg-gradient-to: #e0f2fe;
+  --text-color: #0c4a6e;
+}
+
+.dark {
+  --bg-gradient-from: #111827;
+  --bg-gradient-to: #1f2937;
+  --text-color: #f3f4f6;
+}
+
+body {
+  @apply bg-gradient-to-br from-[var(--bg-gradient-from)] to-[var(--bg-gradient-to)] text-[var(--text-color)];
+}

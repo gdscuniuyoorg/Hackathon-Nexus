@@ -1,0 +1,1 @@
+## Consider renaming `.env.example` to `.env` and also obtain your Gemini API key from google AI Studio
