@@ -24,3 +24,14 @@ From the success of this project, students will be able to see how much they are
     • Reactjs
     • Expressjs
 
+## How to run:
+
+```
+npm install-all
+```
+
+On the root of the project, then;
+
+```
+npm start
+```
