@@ -5,6 +5,7 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 const fs = require('fs');
 const path = require('path');
 const pdf = require('pdf-parse');
+const { createWorker } = require('tesseract.js');
 const dotenv = require('dotenv');
 
 dotenv.config();
@@ -61,6 +62,21 @@ async function extractTextFromPDF(filePath) {
   }
 }
 
+
+async function extractTextFromImage(filePath) {
+	let worker;
+	try {
+		worker = await createWorker('eng');
+		const ret = await worker.recognize(filePath);
+		return ret.data.text;
+	} catch (error) {
+		throw new AppError('Failed to extract text from Image', 400);
+	} finally {
+		await worker.terminate();
+	}
+};
+
+
 app.post('/upload', upload.array('files'), async (req, res, next) => {
   try {
     const files = req.files;
@@ -75,7 +91,8 @@ app.post('/upload', upload.array('files'), async (req, res, next) => {
         const text = await extractTextFromPDF(file.path);
         combinedText += text + '\n\n';
       } else if (file.mimetype.startsWith('image/')) {
-        combinedText += `[Image content from ${file.originalname}]\n\n`;
+        combinedText += await extractTextFromImage(file.path);
+		// console.log(combinedText);
       } else {
         throw new AppError('Unsupported file type', 400);
       }
@@ -104,6 +121,7 @@ app.post('/upload', upload.array('files'), async (req, res, next) => {
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
+	console.log(response.text())
     const generatedQuestions = JSON.parse(response.text());
 
     res.json({ questions: generatedQuestions });
