@@ -6,6 +6,7 @@ const fs = require('fs');
 const path = require('path');
 const pdf = require('pdf-parse');
 const { createWorker } = require('tesseract.js');
+const natural = require('natural');
 const dotenv = require('dotenv');
 
 dotenv.config();
@@ -56,6 +57,16 @@ async function extractTextFromPDF(filePath) {
   try {
     const dataBuffer = fs.readFileSync(filePath);
     const data = await pdf(dataBuffer);
+	if (!data.text.trim()) {
+		console.log('No text found in PDF, attempting OCR...');
+		
+		// Use OCR to extract text from each image in the PDF
+		const imagesText = await extractTextFromImage(filePath);
+		return imagesText;
+	  }
+  
+	  // Return the extracted text for text-based PDFs
+	console.log(data.text);
     return data.text;
   } catch (error) {
     throw new AppError('Failed to extract text from PDF', 400);
@@ -83,12 +94,30 @@ async function extractTextFromImage(filePath) {
 };
 
 
+// Using Jaro-Winkler for string similarity comparison
+function loadModelAndCompare(correctAnswer, userAnswer) {
+  const similarity = natural.JaroWinklerDistance(correctAnswer.toLowerCase(), userAnswer.toLowerCase());
+
+  return similarity; // Similarity score between 0 and 1
+}
+
+const isAnswerSemanticallySimilar = (correctAnswer, userAnswer) => {
+  const similarity = loadModelAndCompare(correctAnswer, userAnswer);
+
+  // Define your threshold for similarity (e.g., 0.75 means 75% similar)
+  return similarity > 0.50;
+};
+
+
 app.post('/upload', upload.array('files'), async (req, res, next) => {
   try {
     const files = req.files;
     if (!files || files.length === 0) {
       throw new AppError('No files uploaded', 400);
     }
+
+	const numQuestions = req.query.numQuestions;
+    const difficulty = req.query.difficulty;
 
     let combinedText = '';
 
@@ -111,26 +140,37 @@ app.post('/upload', upload.array('files'), async (req, res, next) => {
 
     ${combinedText}
 
-    Based on this content, generate 10 questions:
-    - The first 5 questions should be relatively easy, covering basic information and main ideas from the document.
-    - The next 5 questions should be more difficult, requiring deeper understanding or synthesis of information from different parts of the document.
+    Based on this content, generate ${numQuestions} questions:
+    - The questions should be based on the difficult ${difficulty}, requiring deeper understanding or synthesis of information from different parts of the document.
 
+	I need the data in this format:
+	{
+		"preview": "A short description, overview of preview of the document.",
+		"questions": [
+			{
+				"question": "The question text",
+				"difficulty": ${difficulty},
+				"correctAnswer": "The correct answer to the question"
+			}
+		]
+	}
+	
     Format each question as a JSON object with the following structure:
     {
       "question": "The question text",
-      "difficulty": "easy" or "difficult",
+      "difficulty": ${difficulty},
       "correctAnswer": "The correct answer to the question"
     }
 
-    Return the questions as a JSON array, make sure it RETURNS ONLY AND STRICTLY JSON, YOU DONT NEED TO SAY ANYTHING, JUST GIVE ME WHAT I NEED IN JSON, DON'T SAY ANYTHING IN ADDITION.
+    Return the questions as a JSON array, make sure it RETURNS ONLY AND STRICTLY JSON, YOU DONT NEED TO SAY ANYTHING, JUST GIVE ME WHAT I NEED IN JSON, DON'T SAY ANYTHING IN ADDITION. AND MAINTAIN THE SPECIFY DATA FORMAT
     `;
 
     const result = await model.generateContent(prompt);
     const response = await result.response;
-	console.log(response.text())
+	// console.log(response.text())
     const generatedQuestions = JSON.parse(response.text());
 
-    res.json({ questions: generatedQuestions });
+    res.json({ data : generatedQuestions });
   } catch (error) {
     console.error('Error:', error);
     next(error);
@@ -147,45 +187,28 @@ app.post('/upload', upload.array('files'), async (req, res, next) => {
 });
 
 app.post('/validate-answer', async (req, res, next) => {
-  try {
-    const { question, userAnswer } = req.body;
-
-    if (!question || !userAnswer) {
-      throw new AppError('Question and user answer are required', 400);
-    }
-
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
-
-    const prompt = `
-    Question: ${question.question}
-    Correct Answer: ${question.correctAnswer}
-    User Answer: ${userAnswer}
-
-    Evaluate if the user's answer is correct. Consider the following:
-    1. The answer doesn't need to be word-for-word identical to the correct answer.
-    2. Look for key concepts and main ideas in the user's answer.
-    3. If the user's answer captures the essence of the correct answer, consider it correct.
-    4. Flag answer like "I dont remember", "I dont know", etc as Incorrect
-
-    Respond with a JSON object in the following format:
-    {
-      "result": "Correct" or "Incorrect",
-      "explanation": "A brief explanation of why the answer is correct or incorrect"
-    }
-
-    RETURN ONLY THE JSON OBJECT, NO ADDITIONAL TEXT.
-    `;
-
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-    const evaluation = JSON.parse(response.text());
-
-    res.json(evaluation);
-  } catch (error) {
-    console.error('Error:', error);
-    next(error);
-  }
-});
+	try {
+	  const { correctAnswer, userAnswer } = req.body;
+  
+	  if (!correctAnswer || !userAnswer) {
+		throw new AppError('Question and user answer are required', 400);
+	  }
+  
+	  // Use the NLP comparison
+	  const isCorrect = await isAnswerSemanticallySimilar(correctAnswer, userAnswer);
+  
+	  // Respond with validation result
+	  const validationResult = {
+		result: isCorrect ? 'Correct' : 'Incorrect',
+		explanation: isCorrect ? 'Great job!' : `The correct answer was: ${correctAnswer}`
+	  };
+  
+	  res.json(validationResult);
+	} catch (error) {
+	  console.error('Error:', error);
+	  next(error);
+	}
+  });
 
 app.use(errorHandler);
 
