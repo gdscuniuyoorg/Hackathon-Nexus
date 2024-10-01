@@ -68,11 +68,17 @@ async function extractTextFromImage(filePath) {
 	try {
 		worker = await createWorker('eng');
 		const ret = await worker.recognize(filePath);
-		return ret.data.text;
+		if (ret.data.text !== "") {
+			return ret.data.text;
+		} else {
+			throw new Error('No text found in the image');
+		}
 	} catch (error) {
 		throw new AppError('Failed to extract text from Image', 400);
 	} finally {
-		await worker.terminate();
+		if (worker) {
+			await worker.terminate();
+		}
 	}
 };
 
