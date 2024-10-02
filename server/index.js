@@ -55,6 +55,46 @@ const upload = multer({ storage: storage });
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
+
+async function sendQuestions(combinedText, numQuestions, difficulty) {
+	const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+    const prompt = `
+    Analyze the following document:
+
+    ${combinedText}
+
+    Based on this content, generate ${numQuestions} questions:
+    - The questions should be based on the difficult ${difficulty}, requiring deeper understanding or synthesis of information from different parts of the document.
+
+	I need the data in this format:
+	{
+		"preview": "A short description, overview of preview of the document.",
+		"questions": [
+			{
+				"question": "The question text",
+				"difficulty": ${difficulty},
+				"correctAnswer": "The correct answer to the question"
+			}
+		]
+	}
+	
+    Format each question as a JSON object with the following structure:
+    {
+      "question": "The question text",
+      "difficulty": ${difficulty},
+      "correctAnswer": "The correct answer to the question"
+    }
+
+    Return the questions as a JSON array, make sure it RETURNS ONLY AND STRICTLY JSON, YOU DONT NEED TO SAY ANYTHING, JUST GIVE ME WHAT I NEED IN JSON, DON'T SAY ANYTHING IN ADDITION. AND MAINTAIN THE SPECIFY DATA FORMAT
+    `;
+
+    const result = await model.generateContent(prompt);
+	const response = await result.response;
+	return response.text()
+}
+
+
 async function extractTextFromPDF(filePath) {
   try {
     const dataBuffer = fs.readFileSync(filePath);
@@ -126,7 +166,7 @@ const isAnswerSemanticallySimilar = (correctAnswer, userAnswer) => {
   const similarity = loadModelAndCompare(correctAnswer, userAnswer);
 
   // Define your threshold for similarity (e.g., 0.75 means 75% similar)
-  return similarity > 0.50;
+  return similarity > 0.65;
 };
 
 
@@ -147,7 +187,8 @@ app.post('/upload', upload.array('files'), async (req, res, next) => {
         const text = await extractTextFromPDF(file.path);
         combinedText += text + '\n\n';
       } else if (file.mimetype.startsWith('image/')) {
-        combinedText += await extractTextFromImage(file.path);
+        const text = await extractTextFromImage(file.path);
+		combinedText += text + '\n\n';
       }  else if (file.mimetype === 'text/plain') {
 		const text = await extractTextFromTxt(file.path);
         combinedText += text + '\n\n';
@@ -160,42 +201,26 @@ app.post('/upload', upload.array('files'), async (req, res, next) => {
       }
     }
 
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+	let generatedQuestions;
 
-    const prompt = `
-    Analyze the following document:
-
-    ${combinedText}
-
-    Based on this content, generate ${numQuestions} questions:
-    - The questions should be based on the difficult ${difficulty}, requiring deeper understanding or synthesis of information from different parts of the document.
-
-	I need the data in this format:
-	{
-		"preview": "A short description, overview of preview of the document.",
-		"questions": [
-			{
-				"question": "The question text",
-				"difficulty": ${difficulty},
-				"correctAnswer": "The correct answer to the question"
+	/* Tries to check if any error occurs while trying to get questions,
+	* if there's a problem probably in JSON.parse() i.e in Ai sending wrong format
+	* We try again upto get 5 times until the right format is gotten.
+	*/
+	for (let i = 0; i < 5; i++) { 
+		try {
+			let temp = await sendQuestions(combinedText, numQuestions, difficulty);
+			
+			generatedQuestions = JSON.parse(temp);
+			break;
+		} catch (error) {
+			console.error(`Attemptted ${i + 1} times`);
+			
+			if (i === 4) {
+				throw new AppError("Cannot generate question for the files sent", 400);
 			}
-		]
+		}
 	}
-	
-    Format each question as a JSON object with the following structure:
-    {
-      "question": "The question text",
-      "difficulty": ${difficulty},
-      "correctAnswer": "The correct answer to the question"
-    }
-
-    Return the questions as a JSON array, make sure it RETURNS ONLY AND STRICTLY JSON, YOU DONT NEED TO SAY ANYTHING, JUST GIVE ME WHAT I NEED IN JSON, DON'T SAY ANYTHING IN ADDITION. AND MAINTAIN THE SPECIFY DATA FORMAT
-    `;
-
-    const result = await model.generateContent(prompt);
-    const response = await result.response;
-	// console.log(response.text())
-    const generatedQuestions = JSON.parse(response.text());
 
     res.json({ data : generatedQuestions });
   } catch (error) {
