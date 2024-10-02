@@ -60,15 +60,11 @@ async function extractTextFromPDF(filePath) {
     const dataBuffer = fs.readFileSync(filePath);
     const data = await pdf(dataBuffer);
 	if (!data.text.trim()) {
-		console.log('No text found in PDF, attempting OCR...');
-		
-		// Use OCR to extract text from each image in the PDF
-		const imagesText = await extractTextFromImage(filePath);
-		return imagesText;
+		throw new AppError('No text found in PDF', 400);
 	  }
   
 	  // Return the extracted text for text-based PDFs
-	console.log(data.text);
+	// console.log(data.text);
     return data.text;
   } catch (error) {
     throw new AppError('Failed to extract text from PDF', 400);
