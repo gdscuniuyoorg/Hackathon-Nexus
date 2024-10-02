@@ -163,7 +163,7 @@ export default function Component() {
             <div className="space-y-4">
               <div>
                 <h4 className="font-semibold">What file types are supported?</h4>
-                <p>We currently support PDF documents and image files (JPG, PNG).</p>
+                <p>We currently support PDFs, Word documents, text files and image files (JPG, PNG, TXT, DOCX/DOC).</p>
               </div>
               <div>
                 <h4 className="font-semibold">How many questions can I generate?</h4>
