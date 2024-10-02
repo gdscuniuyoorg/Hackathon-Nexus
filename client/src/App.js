@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Upload, FileText, Loader, ChevronRight, CheckCircle, AlertCircle, Moon, Sun, Download, Brain, Book, Zap, Settings, BarChart, Eye, ArrowLeft, HelpCircle, X } from 'lucide-react';
 import { usePDF } from 'react-to-pdf';
+import axios  from 'axios';
 
 export default function Component() {
   const [currentStep, setCurrentStep] = useState('welcome');
@@ -51,32 +52,30 @@ export default function Component() {
   
 	const formData = new FormData();
 	files.forEach((file) => formData.append('files', file));
-  
-	// Construct the query parameters
+
 	const params = new URLSearchParams({
 	  numQuestions: quizSettings.numQuestions,
 	  difficulty: quizSettings.difficulty,
 	}).toString();
   
 	try {
-	  const response = await fetch(`http://localhost:3001/upload?${params}`, {
-		method: 'POST',
-		body: formData,
+	  const response = await axios.post(`http://localhost:3001/upload?${params}`, formData, {
 		onUploadProgress: (progressEvent) => {
-			const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-			setUploadProgress(percentCompleted);
+		  const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+		  setUploadProgress(percentCompleted);
+		},
+		headers: {
+		  'Content-Type': 'multipart/form-data',
 		},
 	  });
   
-	  if (!response.ok) {
-		const errorData = await response.json();
-		throw new Error(errorData.message || 'Failed to upload files');
+	  if (response.status !== 200) {
+		throw new Error('Failed to upload files');
 	  }
   
-	  const data = await response.json();
-	  
+	  const data = response.data;
+  
 	  setQuestions(data.data.questions.slice(0, quizSettings.numQuestions));
-
 	  setPreview(data.data.preview);
 
 	  setCurrentStep('preview');
