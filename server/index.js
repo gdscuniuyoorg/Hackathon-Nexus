@@ -8,6 +8,8 @@ const pdf = require('pdf-parse');
 const { createWorker } = require('tesseract.js');
 const natural = require('natural');
 const dotenv = require('dotenv');
+const textract = require('textract');
+
 
 dotenv.config();
 
@@ -94,6 +96,29 @@ async function extractTextFromImage(filePath) {
 };
 
 
+async function extractTextFromTxt(filePath) {
+    try {
+        const data = fs.readFileSync(filePath);
+        return data.toString();
+    } catch (error) {
+        throw new AppError('Failed to extract text from Text file', 400);
+    }
+}
+
+
+async function extractTextFromDocOrDocx(filePath) {
+  return new Promise((resolve, reject) => {
+    textract.fromFileWithPath(filePath, (error, text) => {
+      if (error) {
+        return reject(new Error('Failed to extract text from DOC/DOCX file'));
+      }
+      resolve(text);
+    });
+  });
+}
+
+
+
 // Using Jaro-Winkler for string similarity comparison
 function loadModelAndCompare(correctAnswer, userAnswer) {
   const similarity = natural.JaroWinklerDistance(correctAnswer.toLowerCase(), userAnswer.toLowerCase());
@@ -127,8 +152,14 @@ app.post('/upload', upload.array('files'), async (req, res, next) => {
         combinedText += text + '\n\n';
       } else if (file.mimetype.startsWith('image/')) {
         combinedText += await extractTextFromImage(file.path);
-		// console.log(combinedText);
-      } else {
+      }  else if (file.mimetype === 'text/plain') {
+		const text = await extractTextFromTxt(file.path);
+        combinedText += text + '\n\n';
+	  } else  if (file.mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || file.mimetype === 'application/msword') {
+		// Handle both .docx and .doc
+		const text = await extractTextFromDocOrDocx(file.path);
+		combinedText += text + '\n\n';
+	  } else {
         throw new AppError('Unsupported file type', 400);
       }
     }
