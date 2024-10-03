@@ -42,16 +42,9 @@ const errorHandler = (err, req, res, next) => {
   });
 };
 
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/');
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname));
-  }
-});
-
+const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
+
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
@@ -196,18 +189,22 @@ app.post('/upload', upload.array('files'), async (req, res, next) => {
     let combinedText = '';
 
     for (const file of files) {
-      if (file.mimetype === 'application/pdf') {
-        const text = await extractTextFromPDF(file.path);
+
+	  const buffer = file.buffer; // Get the file buffer
+      const mimetype = file.mimetype;
+
+      if (mimetype === 'application/pdf') {
+        const text = await extractTextFromPDF(buffer);
         combinedText += text + '\n\n';
-      } else if (file.mimetype.startsWith('image/')) {
-        const text = await extractTextFromImage(file.path);
+      } else if (mimetype.startsWith('image/')) {
+        const text = await extractTextFromImage(buffer);
 		combinedText += text + '\n\n';
-      }  else if (file.mimetype === 'text/plain') {
-		const text = await extractTextFromTxt(file.path);
+      }  else if (mimetype === 'text/plain') {
+		const text = await extractTextFromTxt(buffer);
         combinedText += text + '\n\n';
-	  } else  if (file.mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || file.mimetype === 'application/msword') {
+	  } else  if (mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || mimetype === 'application/msword') {
 		// Handle both .docx and .doc
-		const text = await extractTextFromDocOrDocx(file.path);
+		const text = await extractTextFromDocOrDocx(buffer);
 		combinedText += text + '\n\n';
 	  } else {
         throw new AppError('Unsupported file type', 400);
@@ -239,15 +236,6 @@ app.post('/upload', upload.array('files'), async (req, res, next) => {
   } catch (error) {
     console.error('Error:', error);
     next(error);
-  } finally {
-    // Clean up uploaded files
-    if (req.files) {
-      req.files.forEach(file => {
-        fs.unlink(file.path, err => {
-          if (err) console.error('Error deleting file:', err);
-        });
-      });
-    }
   }
 });
 
