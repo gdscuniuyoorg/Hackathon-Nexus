@@ -95,6 +95,35 @@ async function sendQuestions(combinedText, numQuestions, difficulty) {
 }
 
 
+async function confirmAnswer(question, correctAnswer, userAnswer) {
+	const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+
+    const prompt = `
+    Question: ${question}
+    Correct Answer: ${correctAnswer}
+    User Answer: ${userAnswer}
+
+    Evaluate if the user's answer is correct. Consider the following:
+    1. The answer doesn't need to be word-for-word identical to the correct answer.
+    2. Look for key concepts and main ideas in the user's answer.
+    3. If the user's answer captures the essence of the correct answer, consider it correct.
+    4. Flag answer like "I dont remember", "I dont know", etc as Incorrect
+
+    Respond with a JSON object in the following format:
+    {
+      "result": "Correct" or "Incorrect",
+      "explanation": ${correctAnswer}
+    }
+
+    RETURN ONLY THE JSON OBJECT, NO ADDITIONAL TEXT.
+    `;
+
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    return response.text();
+}
+
+
 async function extractTextFromPDF(filePath) {
   try {
     const dataBuffer = fs.readFileSync(filePath);
@@ -152,22 +181,6 @@ async function extractTextFromDocOrDocx(filePath) {
     });
   });
 }
-
-
-
-// Using Jaro-Winkler for string similarity comparison
-function loadModelAndCompare(correctAnswer, userAnswer) {
-  const similarity = natural.JaroWinklerDistance(correctAnswer.toLowerCase(), userAnswer.toLowerCase());
-
-  return similarity; // Similarity score between 0 and 1
-}
-
-const isAnswerSemanticallySimilar = (correctAnswer, userAnswer) => {
-  const similarity = loadModelAndCompare(correctAnswer, userAnswer);
-
-  // Define your threshold for similarity (e.g., 0.75 means 75% similar)
-  return similarity > 0.65;
-};
 
 
 app.post('/upload', upload.array('files'), async (req, res, next) => {
@@ -238,29 +251,37 @@ app.post('/upload', upload.array('files'), async (req, res, next) => {
   }
 });
 
+
 app.post('/validate-answer', async (req, res, next) => {
 	try {
-	  const { correctAnswer, userAnswer } = req.body;
+	  const { question, correctAnswer, userAnswer } = req.body;
   
 	  if (!correctAnswer || !userAnswer) {
 		throw new AppError('Question and user answer are required', 400);
 	  }
   
-	  // Use the NLP comparison
-	  const isCorrect = await isAnswerSemanticallySimilar(correctAnswer, userAnswer);
-  
-	  // Respond with validation result
-	  const validationResult = {
-		result: isCorrect ? 'Correct' : 'Incorrect',
-		explanation: isCorrect ? 'Great job!' : `The correct answer was: ${correctAnswer}`
-	  };
-  
-	  res.json(validationResult);
-	} catch (error) {
-	  console.error('Error:', error);
-	  next(error);
+	let evaluation;
+	for (let i = 0; i < 5; i++) { 
+		try {
+			let temp = await confirmAnswer(question, correctAnswer, userAnswer);
+			
+			evaluation = JSON.parse(temp);
+			break;
+		} catch (error) {
+			console.error(`Attempted ${i + 1} times`);
+			
+			if (i === 4) {
+				throw new AppError("Error in evaluation", 400);
+			}
+		}
 	}
-  });
+
+    res.json(evaluation);
+  } catch (error) {
+    console.error('Error:', error);
+    next(error);
+  }
+});
 
 app.use(errorHandler);
 

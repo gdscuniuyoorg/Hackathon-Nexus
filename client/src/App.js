@@ -96,6 +96,7 @@ export default function Component() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+			question: questions[currentQuestionIndex].question,
           correctAnswer: questions[currentQuestionIndex].correctAnswer,
           userAnswer: answer,
         }),
