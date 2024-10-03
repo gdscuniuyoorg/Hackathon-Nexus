@@ -8,7 +8,7 @@ const pdf = require('pdf-parse');
 const { createWorker } = require('tesseract.js');
 const natural = require('natural');
 const dotenv = require('dotenv');
-const textract = require('textract');
+const mammoth = require('mammoth');
 
 
 dotenv.config();
@@ -117,9 +117,8 @@ async function confirmAnswer(question, correctAnswer, userAnswer) {
 }
 
 
-async function extractTextFromPDF(filePath) {
+async function extractTextFromPDF(dataBuffer) {
   try {
-    const dataBuffer = fs.readFileSync(filePath);
     const data = await pdf(dataBuffer);
 	if (!data.text.trim()) {
 		throw new AppError('No text found in PDF', 400);
@@ -134,11 +133,11 @@ async function extractTextFromPDF(filePath) {
 }
 
 
-async function extractTextFromImage(filePath) {
+async function extractTextFromImage(buffer) {
 	let worker;
 	try {
 		worker = await createWorker('eng');
-		const ret = await worker.recognize(filePath);
+		const ret = await worker.recognize(buffer);
 		if (ret.data.text !== "") {
 			return ret.data.text;
 		} else {
@@ -154,25 +153,22 @@ async function extractTextFromImage(filePath) {
 };
 
 
-async function extractTextFromTxt(filePath) {
+async function extractTextFromTxt(buffer) {
     try {
-        const data = fs.readFileSync(filePath);
-        return data.toString();
+        return buffer.toString();
     } catch (error) {
         throw new AppError('Failed to extract text from Text file', 400);
     }
 }
 
 
-async function extractTextFromDocOrDocx(filePath) {
-  return new Promise((resolve, reject) => {
-    textract.fromFileWithPath(filePath, (error, text) => {
-      if (error) {
-        return reject(new Error('Failed to extract text from DOC/DOCX file'));
-      }
-      resolve(text);
-    });
-  });
+async function extractTextFromDocx(buffer) {
+  try {
+    const { value: text } = await mammoth.extractRawText({ buffer });
+    return text;
+  } catch (error) {
+    throw new Error('Failed to extract text from DOCX file');
+  }
 }
 
 
@@ -204,7 +200,7 @@ app.post('/upload', upload.array('files'), async (req, res, next) => {
         combinedText += text + '\n\n';
 	  } else  if (mimetype === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' || mimetype === 'application/msword') {
 		// Handle both .docx and .doc
-		const text = await extractTextFromDocOrDocx(buffer);
+		const text = await extractTextFromDocx(buffer);
 		combinedText += text + '\n\n';
 	  } else {
         throw new AppError('Unsupported file type', 400);
