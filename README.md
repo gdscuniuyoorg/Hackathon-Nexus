@@ -164,9 +164,8 @@ http://localhost:3000
 
 For any inquiries or suggestions, please feel free to reach out to the Team:
 
-Wiseman Umanah <wisemanumanah@gmail.com>
-God's power Maurice <verbosetwomillion@gmail.com>
-Habib Adebayo <adebayohabib7@gmail.com>
+- Wiseman Umanah <wisemanumanah@gmail.com>
+- God's power Maurice <verbosetwomillion@gmail.com>
 
 ---
 
