@@ -2,9 +2,11 @@ import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Upload, FileText, Loader, ChevronRight, CheckCircle, AlertCircle, Moon, Sun, Download, Brain, Book, Zap, Settings, BarChart, Eye, ArrowLeft, HelpCircle, X } from 'lucide-react';
 import { usePDF } from 'react-to-pdf';
+import axios  from 'axios';
 
 export default function Component() {
   const [currentStep, setCurrentStep] = useState('welcome');
+  const [previewText, setPreview] = useState('');
   const [files, setFiles] = useState([]);
   const [questions, setQuestions] = useState([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
@@ -44,37 +46,46 @@ export default function Component() {
   };
 
   const handleSubmit = async () => {
-    setIsLoading(true);
-    setError(null);
-    setUploadProgress(0);
+	setIsLoading(true);
+	setError(null);
+	setUploadProgress(0);
+  
+	const formData = new FormData();
+	files.forEach((file) => formData.append('files', file));
 
-    const formData = new FormData();
-    files.forEach((file) => formData.append('files', file));
+	const params = new URLSearchParams({
+	  numQuestions: quizSettings.numQuestions,
+	  difficulty: quizSettings.difficulty,
+	}).toString();
+  
+	try {
+	  const response = await axios.post(`http://localhost:3001/upload?${params}`, formData, {
+		onUploadProgress: (progressEvent) => {
+		  const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
+		  setUploadProgress(percentCompleted);
+		},
+		headers: {
+		  'Content-Type': 'multipart/form-data',
+		},
+	  });
+  
+	  if (response.status !== 200) {
+		throw new Error('Failed to upload files');
+	  }
+  
+	  const data = response.data;
+  
+	  setQuestions(data.data.questions.slice(0, quizSettings.numQuestions));
+	  setPreview(data.data.preview);
 
-    try {
-      const response = await fetch('http://localhost:3001/upload', {
-        method: 'POST',
-        body: formData,
-        onUploadProgress: (progressEvent) => {
-          const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total);
-          setUploadProgress(percentCompleted);
-        },
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Failed to upload files');
-      }
-
-      const data = await response.json();
-      setQuestions(data.questions.slice(0, quizSettings.numQuestions));
-      setCurrentStep('preview');
-    } catch (error) {
-      setError(error.message || 'An error occurred while processing your files. Please try again.');
-    } finally {
-      setIsLoading(false);
-    }
+	  setCurrentStep('preview');
+	} catch (error) {
+	  setError(error.message || 'An error occurred while processing your files. Please try again.');
+	} finally {
+	  setIsLoading(false);
+	}
   };
+  
 
   const handleAnswerSubmit = async (answer) => {
     setIsLoading(true);
@@ -85,7 +96,8 @@ export default function Component() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          question: questions[currentQuestionIndex].question,
+			question: questions[currentQuestionIndex].question,
+          correctAnswer: questions[currentQuestionIndex].correctAnswer,
           userAnswer: answer,
         }),
       });
@@ -96,8 +108,9 @@ export default function Component() {
 
       const data = await response.json();
       const isCorrect = data.result === 'Correct';
+	  const explanation = data.explanation;
 
-      setUserAnswers([...userAnswers, { question: questions[currentQuestionIndex].question, answer, isCorrect }]);
+      setUserAnswers([...userAnswers, { question: questions[currentQuestionIndex].question, answer, isCorrect, explanation }]);
       
       if (isCorrect) {
         setScore(score + 1);
@@ -150,7 +163,7 @@ export default function Component() {
             <div className="space-y-4">
               <div>
                 <h4 className="font-semibold">What file types are supported?</h4>
-                <p>We currently support PDF documents and image files (JPG, PNG).</p>
+                <p>We currently support PDFs, Word documents, text files and image files (JPG, PNG, TXT, DOCX/DOC).</p>
               </div>
               <div>
                 <h4 className="font-semibold">How many questions can I generate?</h4>
@@ -206,7 +219,7 @@ export default function Component() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               className={`px-8 py-4 rounded-full text-xl font-semibold flex items-center transition-colors ${darkMode ? 'bg-gray-700 text-gray-100 hover:bg-gray-600' : 'bg-sky-600 text-white hover:bg-sky-700'}`}
-              onClick={() => setCurrentStep('upload')}
+              onClick={() => setCurrentStep('settings')}
             >
               Get Started <ChevronRight className="ml-2" />
             </motion.button>
@@ -322,9 +335,7 @@ export default function Component() {
               <h3 className="text-3xl font-semibold mb-6">Document Preview</h3>
               <p className="mb-4">Your documents have been processed. Here's a preview of the content:</p>
               <div className={`p-4 rounded-lg ${darkMode ? 'bg-gray-700' : 'bg-gray-100'} mb-6 max-h-60 overflow-y-auto`}>
-                {questions.map((q, index) => (
-                  <p key={index} className="mb-2">{q.question}</p>
-                ))}
+			  <p className={`${darkMode ? 'text-gray-100' : 'text-gray-900'}`}>{previewText}</p>
               </div>
               <div className="flex justify-between">
                 <motion.button
@@ -336,15 +347,22 @@ export default function Component() {
                   <ArrowLeft className="w-5 h-5 mr-2 inline" />
                   Back to Upload
                 </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className={`px-6 py-3 rounded-full transition-colors ${darkMode ? 'bg-gray-700 text-gray-100 hover:bg-gray-600' : 'bg-sky-600 text-white hover:bg-sky-700'}`}
-                  onClick={() => setCurrentStep('settings')}
-                >
-                  Continue to Quiz Settings
-                  <ChevronRight className="w-5 h-5 ml-2 inline" />
-                </motion.button>
+                {questions.length > 0 && (
+				<motion.button
+					whileHover={{ scale: 1.05 }}
+					whileTap={{ scale: 0.95 }}
+					className={`px-6 py-3 rounded-full transition-colors ${
+					darkMode
+						? 'bg-gray-700 text-gray-100 hover:bg-gray-600'
+						: 'bg-sky-600 text-white hover:bg-sky-700'
+					}`}
+					onClick={() => setCurrentStep('quiz')}
+				>
+					Continue to Quiz
+					<ChevronRight className="w-5 h-5 ml-2 inline" />
+				</motion.button>
+				)}
+
               </div>
             </div>
           </motion.div>
@@ -390,7 +408,7 @@ export default function Component() {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 className={`mt-8 px-6 py-3 rounded-full w-full transition-colors ${darkMode ? 'bg-gray-700 text-gray-100 hover:bg-gray-600' : 'bg-sky-600 text-white hover:bg-sky-700'}`}
-                onClick={() => setCurrentStep('quiz')}
+                onClick={() => setCurrentStep('upload')}
               >
                 Start Quiz
               </motion.button>
@@ -457,6 +475,7 @@ export default function Component() {
                     <p className={answer.isCorrect ? 'text-green-500' : 'text-red-500'}>
                       {answer.isCorrect ? 'Correct' : 'Incorrect'}
                     </p>
+					<p>Reason: { answer.explanation }</p>
                   </div>
                 ))}
               </div>
@@ -467,7 +486,7 @@ export default function Component() {
                   whileTap={{ scale: 0.95 }}
                   className={`px-6 py-3 rounded-full transition-colors ${darkMode ? 'bg-gray-700 text-gray-100 hover:bg-gray-600' : 'bg-sky-600 text-white hover:bg-sky-700'}`}
                   onClick={() => {
-                    setCurrentStep('upload');
+                    setCurrentStep('settings');
                     setFiles([]);
                     setQuestions([]);
                     setCurrentQuestionIndex(0);

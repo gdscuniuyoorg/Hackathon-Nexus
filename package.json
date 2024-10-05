@@ -14,5 +14,9 @@
   "license": "ISC",
   "devDependencies": {
     "concurrently": "^6.5.1"
+  },
+  "dependencies": {
+    "natural": "^8.0.1",
+    "pdf-lib": "^1.17.1"
   }
 }
