@@ -132,13 +132,11 @@ app.post('/upload', upload.array('files'), async (req, res, next) => {
 		combinedText += cleanText(extractedText) + ' ';
 	  }
   
-	
-	//   console.log(`Total combined text length: ${combinedText.length} characters`);
   
 	  
 	  const prompt = `
 		Based on each of the following document content:
-		${combinedText}, if it is empty, "questions" should be an empty array
+		${combinedText}, if it is empty or there's no context for you to generate questions, "questions" should be an empty array and 'preview' should tell the user to provide a better document that is well-structured or scanned
 		Generate ${numQuestions} questions of ${difficulty} difficulty.
 		Format the response as:
 		{
