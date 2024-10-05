@@ -347,15 +347,22 @@ export default function Component() {
                   <ArrowLeft className="w-5 h-5 mr-2 inline" />
                   Back to Upload
                 </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  className={`px-6 py-3 rounded-full transition-colors ${darkMode ? 'bg-gray-700 text-gray-100 hover:bg-gray-600' : 'bg-sky-600 text-white hover:bg-sky-700'}`}
-                  onClick={() => setCurrentStep('quiz')}
-                >
-                  Continue to Quiz
-                  <ChevronRight className="w-5 h-5 ml-2 inline" />
-                </motion.button>
+                {questions.length > 0 && (
+				<motion.button
+					whileHover={{ scale: 1.05 }}
+					whileTap={{ scale: 0.95 }}
+					className={`px-6 py-3 rounded-full transition-colors ${
+					darkMode
+						? 'bg-gray-700 text-gray-100 hover:bg-gray-600'
+						: 'bg-sky-600 text-white hover:bg-sky-700'
+					}`}
+					onClick={() => setCurrentStep('quiz')}
+				>
+					Continue to Quiz
+					<ChevronRight className="w-5 h-5 ml-2 inline" />
+				</motion.button>
+				)}
+
               </div>
             </div>
           </motion.div>
