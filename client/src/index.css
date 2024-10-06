@@ -1,19 +1,896 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import url("https://fonts.googleapis.com/css2?family=Quicksand&display=swap");
 
-:root {
-  --bg-gradient-from: #ffffff;
-  --bg-gradient-to: #e0f2fe;
-  --text-color: #0c4a6e;
+* {
+  padding: 0;
+  margin: 0;
+  border: none;
+  outline: none;
+  text-decoration: none;
+  list-style: none;
+  box-sizing: border-box;
+  font-family: "Quicksand", sans-serif;
 }
 
-.dark {
-  --bg-gradient-from: #111827;
-  --bg-gradient-to: #1f2937;
-  --text-color: #f3f4f6;
+body.theme-light {
+  --primary: #5964e0;
+  --main-text: #19202d;
+  --faded-text: #6e8098;
+  --light-text: #8c8f96;
+  --dark-background: #f4f6f8;
+  --light-background: #ffffff;
+  transition: background-color ease 1000ms;
+  background-color: var(--dark-background);
 }
 
-body {
-  @apply bg-gradient-to-br from-[var(--bg-gradient-from)] to-[var(--bg-gradient-to)] text-[var(--text-color)];
+body.theme-dark {
+  --primary: #5964e0;
+  --main-text: #ffffff;
+  --faded-text: #6e8098;
+  --light-text: #ffffff;
+  --dark-background: #121721;
+  --light-background: #19202d;
+  transition: background-color ease 1000ms;
+  background-color: var(--dark-background);
+}
+
+.overall-wrapper {
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  padding: 20px;
+}
+
+.overall-wrapper > section {
+  grid-column: 1;
+  grid-column-end: 13;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-direction: row;
+  gap: 20px;
+  padding-block: 20px;
+}
+
+.header h1 {
+  font-size: 22px;
+  color: var(--main-text);
+}
+
+.left {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-direction: row;
+  gap: 40px;
+}
+
+header .toggle {
+  display: flex;
+  justify-content: end;
+  align-items: center;
+}
+
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-direction: row;
+  gap: 20px;
+}
+
+nav a {
+  color: var(--faded-text);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.home {
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  flex-direction: column;
+  gap: 60px;
+}
+
+.hero {
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  text-align: center;
+  flex-direction: column;
+  gap: 30px;
+  padding: 50px 20px;
+}
+
+.hero > strong {
+  font-size: 42px;
+  color: var(--main-text);
+  line-height: 36px;
+}
+
+.hero > p {
+  font-size: 20px;
+  max-width: 700px;
+  line-height: 28px;
+  color: var(--light-text);
+}
+
+.hero a {
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  text-align: center;
+  flex-direction: row;
+  gap: 10px;
+  background-color: var(--primary);
+  padding: 14px 24px;
+  font-size: 18px;
+  border-radius: 30px;
+  color: #fff;
+  font-weight: 500;
+  text-align: center;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  place-items: center;
+  gap: 30px;
+  margin-inline: 30px;
+}
+
+.cards > div {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: start;
+  align-items: start;
+  text-align: left;
+  flex-direction: column;
+  gap: 20px;
+  background-color: var(--light-background);
+  padding: 24px;
+  border-radius: 14px;
+}
+
+.cards > div > .icon {
+  color: #fff;
+  width: 50px;
+  height: 50px;
+  border-radius: 6px;
+  background-color: var(--primary);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+}
+
+.cards > div > strong {
+  color: var(--main-text);
+  font-size: 21px;
+}
+
+.cards > div > p {
+  color: var(--light-text);
+  font-size: 16px;
+}
+
+.howto {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: left;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 600px;
+  margin-inline: auto;
+}
+
+.howto strong {
+  color: var(--main-text);
+  font-size: 28px;
+}
+
+.howto ul {
+  display: flex;
+  justify-content: start;
+  align-items: start;
+  text-align: left;
+  flex-direction: column;
+  gap: 20px;
+  color: var(--light-text);
+}
+
+.howto ul li {
+  list-style-type: disc;
+  list-style-position: inside;
+}
+
+.faq-container {
+  max-width: 600px;
+  text-align: left;
+  align-self: stretch;
+  margin: 0 auto;
+}
+
+.faq-container h1 {
+  color: var(--main-text);
+  font-size: 28px;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.faq-item {
+  border-bottom: 1px solid var(--light-text);
+  border-radius: 5px;
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+
+.faq-question {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  cursor: pointer;
+  color: var(--main-text);
+}
+
+.faq-question .icon {
+  width: 24px;
+  height: 24px;
+}
+
+.faq-answer {
+  max-height: 0;
+  overflow: hidden;
+  transition: all 0.3s ease-out;
+  color: var(--light-text);
+}
+
+.faq-answer.show {
+  max-height: 100px;
+  padding: 26px 10px;
+  transition: all 0.5s ease-in;
+}
+
+.faq-answer.hide {
+  max-height: 0;
+}
+
+.help {
+  display: flex;
+  justify-content: start;
+  align-items: stretch;
+  flex-direction: column;
+  gap: 20px;
+  max-width: 600px;
+  margin-inline: auto;
+}
+
+.help strong {
+  color: var(--main-text);
+  font-size: 24px;
+}
+
+.help p {
+  color: var(--main-text);
+  font-size: 16px;
+}
+
+footer p {
+  color: var(--main-text);
+  font-size: 16px;
+  text-align: center;
+  margin-block: 30px;
+  font-weight: 600;
+}
+
+.settings {
+  width: 100%;
+  max-width: 700px;
+  margin: 80px auto;
+  border-radius: 12px;
+  padding: 30px;
+  background-color: var(--light-background);
+  display: flex;
+  justify-content: start;
+  align-items: stretch;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.settings > strong {
+  color: var(--main-text);
+  font-size: 24px;
+}
+
+.settings > button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  flex-direction: row;
+  background-color: var(--primary);
+  padding: 14px;
+  font-size: 18px;
+  border-radius: 30px;
+  color: #fff;
+  font-weight: 700;
+  text-align: center;
+}
+
+.settings > button:focus,
+.settings > button:hover {
+  opacity: 0.5;
+}
+
+.settings > div {
+  display: flex;
+  justify-content: start;
+  align-items: stretch;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.settings > div > label {
+  display: block;
+  color: var(--faded-text);
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.settings > div > input {
+  width: 100%;
+  height: 40px;
+  border-radius: 5px;
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  font-size: 18px;
+  padding: 12px;
+  outline: none;
+  border: 1px solid var(--dark-background);
+  transition: border ease 500ms;
+  color: var(--faded-text);
+  background-color: var(--dark-background);
+}
+
+.settings > div > input:hover {
+  border-color: var(--faded-text);
+}
+
+.settings > div select {
+  width: 100%;
+  height: 40px;
+  border-radius: 5px;
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  font-size: 18px;
+  outline: none;
+  border: 1px solid var(--light-background);
+  transition: border ease 500ms;
+  padding-inline: 12px;
+  appearance: none;
+  -webkit-appearance: none;
+  color: var(--faded-text);
+  background-color: var(--dark-background);
+}
+
+.settings > div > div {
+  width: 100%;
+  position: relative;
+}
+
+.settings > div > div > .chevron-down {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  right: 10px;
+}
+
+.upload {
+  width: 100%;
+  max-width: 700px;
+  margin: 50px auto;
+  border-radius: 12px;
+  padding: 30px;
+  background-color: var(--light-background);
+  display: flex;
+  justify-content: start;
+  align-items: stretch;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.upload > strong {
+  color: var(--main-text);
+  font-size: 24px;
+}
+
+.upload > button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  flex-direction: row;
+  background-color: var(--primary);
+  padding: 14px;
+  font-size: 18px;
+  border-radius: 30px;
+  color: #fff;
+  font-weight: 700;
+  text-align: center;
+}
+
+.upload > button:focus,
+.upload > button:hover {
+  opacity: 0.5;
+}
+
+.upload > div {
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  flex-direction: column;
+  background-color: var(--dark-background);
+  padding: 30px;
+  border-radius: 8px;
+  gap: 20px;
+  color: var(--main-text);
+}
+
+.upload > div > label {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  flex-direction: row;
+  background-color: var(--primary);
+  padding: 14px 24px;
+  font-size: 16px;
+  border-radius: 6px;
+  color: #fff;
+  font-weight: 700;
+  text-align: center;
+}
+
+.upload > div > strong {
+  color: var(--main-text);
+  font-size: 20px;
+}
+
+.upload > div > ul {
+  display: flex;
+  justify-content: start;
+  align-items: stretch;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.upload > div > ul > li {
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  flex-direction: row;
+  gap: 12px;
+}
+
+.text-cont {
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.text-cont > label {
+  font-size: 16px;
+  border-radius: 6px;
+  color: var(--main-text);
+  font-weight: 700;
+  text-align: center;
+}
+
+.text-cont > textarea {
+  width: 100%;
+  height: 120px;
+  border-radius: 5px;
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  font-size: 18px;
+  padding: 12px;
+  outline: none;
+  border: 1px solid var(--dark-background);
+  transition: border ease 500ms;
+  color: var(--faded-text);
+  background-color: var(--dark-background);
+  resize: none;
+}
+
+.text-cont > textarea:hover {
+  border-color: var(--faded-text);
+}
+
+.progress {
+  width: 100%;
+  background-color: var(--main-text);
+  border-radius: 12px;
+  height: 10px;
+}
+
+.progress div {
+  width: 100%;
+  background-color: var(--primary);
+  border-radius: inherit;
+  height: 100%;
+}
+
+.preview {
+  width: 100%;
+  max-width: 700px;
+  margin: 50px auto;
+  border-radius: 12px;
+  padding: 24px;
+  background-color: var(--light-background);
+  display: flex;
+  justify-content: start;
+  align-items: stretch;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.preview > strong {
+  color: var(--main-text);
+  font-size: 24px;
+}
+
+.preview > p {
+  color: var(--faded-text);
+  font-size: 16px;
+}
+
+.preview > div {
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+  border-radius: 8px;
+  background-color: var(--dark-background);
+  color: var(--main-text);
+}
+
+.preview > div:last-child {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-direction: row;
+  gap: 20px;
+  padding: 30px;
+  border-radius: 8px;
+  background-color: var(--dark-background);
+  color: var(--main-text);
+}
+
+.preview > div:last-child > button {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-direction: row;
+  gap: 8px;
+  padding: 12px 20px;
+  border-radius: 8px;
+  background-color: var(--primary);
+  color: #fff;
+}
+
+.preview > div:last-child > button:focus,
+.preview > div:last-child > button:hover {
+  opacity: 0.5;
+}
+
+.quiz {
+  width: 100%;
+  max-width: 700px;
+  margin: 50px auto;
+  border-radius: 12px;
+  padding: 24px;
+  background-color: var(--light-background);
+  display: flex;
+  justify-content: start;
+  align-items: stretch;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.quiz > strong {
+  color: var(--main-text);
+  font-size: 24px;
+}
+
+.quiz > div:last-child {
+  display: flex;
+  justify-content: start;
+  align-items: stretch;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+  border-radius: 8px;
+  background-color: var(--dark-background);
+  color: var(--main-text);
+}
+
+.quiz > div > input {
+  width: 100%;
+  height: 40px;
+  border-radius: 5px;
+  display: flex;
+  justify-content: start;
+  align-items: center;
+  font-size: 18px;
+  padding: 12px;
+  outline: none;
+  border: 1px solid var(--dark-background);
+  transition: border ease 500ms;
+  color: var(--faded-text);
+  background-color: var(--light-background);
+}
+
+.quiz > div > input:hover {
+  border-color: var(--faded-text);
+}
+
+.quiz > div > button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  flex-direction: row;
+  background-color: var(--primary);
+  padding: 14px;
+  font-size: 18px;
+  border-radius: 30px;
+  color: #fff;
+  font-weight: 700;
+  text-align: center;
+  cursor: pointer;
+}
+
+.quiz > div > button:focus,
+.quiz > div > button:hover {
+  opacity: 0.5;
+}
+
+.quiz .progress {
+  width: 100%;
+  background-color: var(--main-text);
+  border-radius: 12px;
+  height: 10px;
+}
+
+.quiz .progress div {
+  width: 100%;
+  background-color: var(--primary);
+  border-radius: inherit;
+  height: 100%;
+}
+
+.result > div {
+  width: 100%;
+  max-width: 700px;
+  margin: 50px auto;
+  border-radius: 12px;
+  padding: 24px;
+  background-color: var(--light-background);
+  display: flex;
+  justify-content: start;
+  align-items: stretch;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.result > div > strong {
+  color: var(--main-text);
+  font-size: 24px;
+}
+
+.result > div > p {
+  color: var(--light-text);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.result > div > div {
+  display: flex;
+  justify-content: start;
+  align-items: stretch;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+  border-radius: 8px;
+  background-color: var(--dark-background);
+  color: var(--main-text);
+}
+
+.result > div > div > div {
+  display: flex;
+  justify-content: start;
+  align-items: stretch;
+  flex-direction: column;
+  gap: 6px;
+  padding: 20px;
+  border-radius: 8px;
+  background-color: var(--dark-background);
+  color: var(--main-text);
+}
+
+.result > div > div > div > p {
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.result > div > div > div > p:nth-child(1) {
+  color: var(--faded-text);
+}
+
+.result > div > div strong.red {
+  color: #ff293b;
+}
+
+.result > div > div strong.green {
+  color: #258c53;
+}
+
+.result > div > div:last-child {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-direction: row;
+  gap: 20px;
+  padding: 30px;
+  border-radius: 8px;
+  background-color: var(--dark-background);
+  color: var(--main-text);
+}
+
+.result > div > div:last-child > button {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-direction: row;
+  gap: 8px;
+  padding: 12px 20px;
+  border-radius: 8px;
+  background-color: var(--primary);
+  color: #fff;
+}
+
+.dev {
+  margin: 50px auto;
+  border-radius: 12px;
+  padding: 10px;
+  background-color: var(--light-background);
+  display: flex;
+  justify-content: start;
+  align-items: stretch;
+  flex-direction: column;
+  gap: 40px;
+  padding: 30px;
+}
+
+.dev p {
+  color: var(--faded-text);
+}
+
+.dev a {
+  color: var(--primary);
+}
+
+.dev > strong {
+  color: var(--main-text);
+  font-size: 24px;
+}
+
+.code {
+  height: 100px;
+  max-height: fit-content;
+}
+
+.code .highlight {
+  height: 100%;
+}
+
+.code button {
+  background-color: var(--dark-background);
+  color: var(--main-text);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  gap: 6px;
+  padding: 10px;
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+/* .dev > div:last-child {
+  display: flex;
+  justify-content: start;
+  align-items: stretch;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+  border-radius: 8px;
+  background-color: var(--dark-background);
+  color: var(--main-text);
+} */
+
+.result > div > div:last-child > button:focus,
+.result > div > div:last-child > button:hover {
+  opacity: 0.5;
+}
+
+@media screen and (max-width: 768px) {
+  .header {
+    position: relative;
+  }
+
+  nav.none {
+    display: none;
+  }
+
+  nav {
+    display: flex;
+    justify-content: start;
+    align-items: stretch;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px;
+    background-color: var(--light-background);
+    width: 100%;
+    position: absolute;
+    top: 60px;
+    left: 50%;
+    transform: translateX(-50%);
+    box-sizing: 0px 2px 5px var(--faded-text);
+  }
+  nav a {
+    line-height: 40px;
+  }
+
+  .bar-icon {
+    display: block;
+    color: var(--main-text);
+  }
+}
+
+@media screen and (min-width: 768px) {
+  .overall-wrapper > section {
+    grid-column: 2;
+    grid-column-end: 12;
+  }
+
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .bar-icon {
+    display: none;
+  }
+}
+
+@media screen and (min-width: 1080px) {
+  .cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
 }
