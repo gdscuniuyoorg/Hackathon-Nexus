@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "natural": "^8.0.1",
-    "pdf-lib": "^1.17.1"
+    "pdf-lib": "^1.17.1",
+    "react-copy-to-clipboard": "^5.1.0"
   }
 }
