@@ -1,7 +1,6 @@
 import React from "react";
 import { useCompContext } from "../../context/CompContext";
-import { FileText, Upload } from "lucide-react";
-import { ToastContainer } from "react-toastify";
+import { AlertCircle, FileText, Upload } from "lucide-react";
 
 const UploadFile = () => {
   const {
@@ -33,7 +32,11 @@ const UploadFile = () => {
       </div>
       <section className="text-cont">
         <label htmlFor="text-prompt">Add additional details</label>
-        <textarea name="text-prompt" id="text-prompt"></textarea>
+        <textarea
+          name="text-prompt"
+          id="text-prompt"
+          placeholder="Add additional context here"
+        ></textarea>
       </section>
       {files.length > 0 && (
         <div>
@@ -59,7 +62,12 @@ const UploadFile = () => {
           <p>{uploadProgress}% Uploaded</p>
         </div>
       )}
-      {error && <ToastContainer />}
+      {error && (
+        <section className="error">
+          <AlertCircle />
+          {error}
+        </section>
+      )}
     </section>
   );
 };

@@ -3,7 +3,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Layout from "./Layout";
 import Home from "./pages/Home";
 import Upload from "./pages/Upload";
-import "react-toastify/dist/ReactToastify.css";
+import NotFound from "./pages/NotFound";
 import Developer from "./pages/Developer";
 
 const router = createBrowserRouter([
@@ -22,6 +22,10 @@ const router = createBrowserRouter([
       {
         path: "docs",
         element: <Developer />,
+      },
+      {
+        path: "*",
+        element: <NotFound />,
       },
     ],
   },

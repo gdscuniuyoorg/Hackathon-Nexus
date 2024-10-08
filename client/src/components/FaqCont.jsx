@@ -25,7 +25,7 @@ const FAQItem = ({ question, answer }) => {
   );
 };
 
-const FAQ = () => {
+const FaqCont = () => {
   const faqs = [
     {
       question: "What file types are supported?",
@@ -53,4 +53,4 @@ const FAQ = () => {
   );
 };
 
-export default FAQ;
+export default FaqCont;
