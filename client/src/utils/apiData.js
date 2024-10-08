@@ -1,5 +1,5 @@
 const apiData = () => {
-  const curlCode = `curl -X POST "http://localhost:3001/upload?numQuestions={number of questions needed}&difficulty={ quiz difficulty }" \\
+  const curlCode = `curl -X POST "https://hackathon-nexus.onrender.com/upload?numQuestions={number of questions needed}&difficulty={ quiz difficulty }" \\
 -F "files=@/path/to/file"`;
 
   const jsCode = `const fs = require('fs');
@@ -17,7 +17,7 @@ async function Quiz() {
         difficulty: 'Question difficulty'
     }).toString();
 
-        const response = await fetch(\`http://localhost:3001/upload?\${params}\`, {
+        const response = await fetch(\`https://hackathon-nexus.onrender.com/upload?\${params}\`, {
             method: 'POST',
             body: formData,
             headers: {
@@ -40,14 +40,14 @@ params = {
 files = {
            "files": open("adobe_text_rendering.png", "rb")
        }
-response = requests.post("http://localhost:3001/upload", files=files, params=params)
+response = requests.post("https://hackathon-nexus.onrender.com/upload", files=files, params=params)
   
 if response.status_code == 200:
 	print("Response:", response.json())
 else:
         print("Error:", response.status_code, response.text)`;
 
-  const validateCurlCode = `curl -X POST http://localhost:3001/validate-answer \\
+  const validateCurlCode = `curl -X POST https://hackathon-nexus.onrender.com/validate-answer \\
 -H "Content-Type: application/json" \\
 -d '{
         "question": "The question",
@@ -62,7 +62,7 @@ else:
   };
 
 (async function() {
-	const response = await fetch('http://localhost:3001/validate-answer', {
+	const response = await fetch('https://hackathon-nexus.onrender.com/validate-answer', {
 	      method: 'POST',
 	      headers: {
 	        'Content-Type': 'application/json'
@@ -81,7 +81,7 @@ payload = {
             "correctAnswer": "The correct answer",
             "userAnswer": "The user's answer"
         }
-response = requests.post("http://localhost:3001/validate-answer", json=payload, headers=headers)
+response = requests.post("https://hackathon-nexus.onrender.com/validate-answer", json=payload, headers=headers)
 if response.status_code == 200:
 	print("Validation Result:", response.json())
 else:
