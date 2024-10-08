@@ -1,0 +1,6 @@
+# Allow all search engines to access all content
+User-agent: *
+Disallow:
+
+# Sitemap location
+Sitemap: https://question-genius.vercel.app/sitemap.xml

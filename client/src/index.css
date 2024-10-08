@@ -294,7 +294,7 @@ footer p {
 
 footer span {
   display: block;
-  color: var(--primary);
+  color: var(--main-text);
   font-size: 20px;
   text-align: center;
   margin-block: 30px;
@@ -594,9 +594,9 @@ footer span {
 
 .preview > div:last-child {
   display: flex;
-  justify-content: space-between;
+  justify-content: start;
   align-items: center;
-  flex-direction: row;
+  flex-direction: column;
   gap: 20px;
   padding: 30px;
   border-radius: 8px;
@@ -750,7 +750,7 @@ footer span {
   align-items: stretch;
   flex-direction: column;
   gap: 6px;
-  padding: 20px;
+  /* padding: 20px; */
   border-radius: 8px;
   background-color: var(--dark-background);
   color: var(--main-text);
@@ -775,9 +775,9 @@ footer span {
 
 .result > div > div:last-child {
   display: flex;
-  justify-content: space-between;
+  justify-content: start;
   align-items: center;
-  flex-direction: row;
+  flex-direction: column;
   gap: 20px;
   padding: 30px;
   border-radius: 8px;
@@ -973,6 +973,18 @@ h4 {
 
   .bar-icon {
     display: none;
+  }
+
+  .preview > div:last-child {
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: row;
+  }
+
+  .result > div > div:last-child {
+    justify-content: space-between;
+    align-items: center;
+    flex-direction: row;
   }
 }
 
