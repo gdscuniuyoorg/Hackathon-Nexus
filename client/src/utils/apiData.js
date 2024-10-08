@@ -1,5 +1,7 @@
 const apiData = () => {
-  const curlCode = `curl -X POST "https://hackathon-nexus.onrender.com/upload?numQuestions={number of questions needed}&difficulty={ quiz difficulty }" \\
+
+const curlCode = `curl -X POST "https://hackathon-nexus.onrender.com/upload?numQuestions={number of questions needed}&difficulty={ quiz difficulty }" \\
+
 -F "files=@/path/to/file"`;
 
   const jsCode = `const fs = require('fs');
@@ -18,6 +20,7 @@ async function Quiz() {
     }).toString();
 
         const response = await fetch(\`https://hackathon-nexus.onrender.com/upload?\${params}\`, {
+
             method: 'POST',
             body: formData,
             headers: {
@@ -41,6 +44,7 @@ files = {
            "files": open("adobe_text_rendering.png", "rb")
        }
 response = requests.post("https://hackathon-nexus.onrender.com/upload", files=files, params=params)
+
   
 if response.status_code == 200:
 	print("Response:", response.json())
@@ -48,6 +52,7 @@ else:
         print("Error:", response.status_code, response.text)`;
 
   const validateCurlCode = `curl -X POST https://hackathon-nexus.onrender.com/validate-answer \\
+
 -H "Content-Type: application/json" \\
 -d '{
         "question": "The question",
@@ -82,6 +87,7 @@ payload = {
             "userAnswer": "The user's answer"
         }
 response = requests.post("https://hackathon-nexus.onrender.com/validate-answer", json=payload, headers=headers)
+
 if response.status_code == 200:
 	print("Validation Result:", response.json())
 else:
