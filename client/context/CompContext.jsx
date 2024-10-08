@@ -53,7 +53,7 @@ export const CompProvider = ({ children }) => {
 
     try {
       const response = await axios.post(
-        `https://questiongeniusserver.vercel.app/upload?${params}`,
+        `https://hackathon-nexus.onrender.com/upload?${params}`,
         formData,
         {
           onUploadProgress: (progressEvent) => {
@@ -92,7 +92,7 @@ export const CompProvider = ({ children }) => {
     setIsLoading(true);
     try {
       const response = await fetch(
-        "https://questiongeniusserver.vercel.app/validate-answer",
+        "https://hackathon-nexus.onrender.com/validate-answer",
         {
           method: "POST",
           headers: {
