@@ -1,6 +1,5 @@
 import React, { createContext, useState, useContext } from "react";
 import axios from "axios";
-import { toast } from "react-toastify";
 import { usePDF } from "react-to-pdf";
 
 const CompContext = createContext();
@@ -80,7 +79,6 @@ export const CompProvider = ({ children }) => {
 
       setCurrentStep("preview");
     } catch (error) {
-      toast.error("An error occurred while fetching data!");
       setError(
         error.message ||
           "An error occurred while processing your files. Please try again."
@@ -138,7 +136,6 @@ export const CompProvider = ({ children }) => {
         updateOverallProgress();
       }
     } catch (error) {
-      toast.error("An error occurred while fetching data!");
       setError(
         error.message ||
           "An error occurred while validating your answer. Please try again."
