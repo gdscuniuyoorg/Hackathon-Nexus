@@ -5,9 +5,9 @@ import "./index.css";
 import { CompProvider } from "../context/CompContext.jsx";
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  <React.StrictMode>
-    <CompProvider>
+  <CompProvider>
+    <React.StrictMode>
       <App />
-    </CompProvider>
-  </React.StrictMode>
+    </React.StrictMode>
+  </CompProvider>
 );
